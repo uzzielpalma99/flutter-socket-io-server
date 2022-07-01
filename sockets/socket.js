@@ -1,20 +1,21 @@
 const {io} = require('../index');
+const{ v4 : uuidV4} = require('uuid');
 
-const Bands = require('../models/bands');
-const Band = require('../models/band');
+const Emprendimientos = require('../models/emprendimientos');
+const Emprendimiento = require('../models/emprendimiento');
 
-const bands = new Bands();
+const emprendimientos = new Emprendimientos();
 
-bands.addBand(new Band('Queen'));
-bands.addBand(new Band('Bon Jovi'));
-bands.addBand(new Band('Heroes del Silencio'));
-bands.addBand(new Band('Metallica'));
+emprendimientos.addEmprendimiento(new Emprendimiento(uuidV4(), 'Miguel González', '1. Revisar conexiones eléctricas. 2. Informar riesgos.', 'Técnicos del futuro', 'Obtener nuevo talento de comunidades rurales en tecnología', 'Chiapas'));
+emprendimientos.addEmprendimiento(new Emprendimiento(uuidV4(), 'Roberto García', '1. Listar un informe de materia prima. 2 Recabacar conteo de prendas. 3. Validar costos. 4. Capacitar empleados.', 'Moda mexicana tradicional', 'Implementar industria textil con mano de obra de zonas marginadas', 'Oaxaca'));
+emprendimientos.addEmprendimiento(new Emprendimiento(uuidV4(), 'Brenda Araujo', '1. Llevar un informe de plantas y flores cultivadas. 2. Solcitar pesticidas y abono. 3. Instalar 5 viveres adicionales. 4. Planificar sistema de riego.', 'Floricultores del sur', 'Implementar un mercado de plantas favoreciendonos de las condiciones amnbientales de la ciudad de méxico', 'Xochimilco y Milpa Alta'));
+emprendimientos.addEmprendimiento(new Emprendimiento(uuidV4(), 'Adrián Peralta', '1. Implementar proceso de obtención de aceite de coco', 'Cosméticos naturistas', 'Popularizar el uso del aceite de coco con un producto natural en la sociedad mexicana', 'Guerrero'));
 
 //Mensajes de sockets
 io.on('connection', client => {
     console.log('cliente conectado');
 
-    client.emit('active-bands', bands.getBands());
+    client.emit('active-emprendimientos', emprendimientos.getEmprendimientos());
 
     client.on('disconnect', () => { 
         console.log('Cliente desconenctado');
@@ -25,23 +26,23 @@ io.on('connection', client => {
         io.emit('mensaje', {admin: 'Nuevo mensaje'});
     });
 
-    client.on('vote-band', (payload) => {
+    // client.on('vote-band', (payload) => {
         
-        bands.voteBand(payload.id);
-        io.emit('active-bands', bands.getBands());
+    //     bands.voteBand(payload.id);
+    //     io.emit('active-bands', bands.getBands());
+    
+    // });
+
+    client.on('add-emprendimiento', (payload) => {
+        const newEmprendimiento = new Emprendimiento(payload.id, payload.emprendedor, payload.actividades, payload.emprendimiento, payload.descripcion, payload.localidad);
+        emprendimientos.addEmprendimiento(newEmprendimiento);
+        io.emit('active-emprendimientos', emprendimientos.getEmprendimientos());
     
     });
 
-    client.on('add-band', (payload) => {
-        const newBand = new Band(payload.name);
-        bands.addBand(newBand);
-        io.emit('active-bands', bands.getBands());
-    
-    });
-
-    client.on('delete-band', (payload) => {
-        bands.deleteBands(payload.id)
-        io.emit('active-bands', bands.getBands());
+    client.on('delete-emprendimiento', (payload) => {
+        emprendimientos.deleteEmprendimientos(payload.id)
+        io.emit('active-emprendimientos', emprendimientos.getEmprendimientos());
     });
 
 
